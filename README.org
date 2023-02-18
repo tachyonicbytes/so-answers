@@ -1,0 +1,5 @@
+#+title: README
+
+My answers to some StackOverflow questions.
+
+This exists because the research for some questions takes time and maybe people want to see the full example.

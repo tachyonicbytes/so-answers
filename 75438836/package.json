@@ -1,0 +1,23 @@
+{
+  "exports": {
+    ".": {
+      "import": "./build/release.js",
+      "types": "./build/release.d.ts"
+    }
+  },
+  "scripts": {
+    "asbuild:debug": "asc assembly/index.ts --target debug",
+    "asbuild:release": "asc assembly/index.ts --target release",
+    "asbuild:debug:simd": "asc assembly/index.ts --target debug --enable simd",
+    "asbuild:release:simd": "asc assembly/index.ts --target release --enable simd",
+    "asbuild": "npm run asbuild:debug && npm run asbuild:release",
+    "test": "node tests",
+    "start": "npx serve ."
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.27.0"
+  },
+  "dependencies": {
+    "@assemblyscript/loader": "^0.27.0"
+  }
+}
