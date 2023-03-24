@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+      <script src="https://cdn.jsdelivr.net/pyodide/v0.22.1/full/pyodide.js"></script>
+  </head>
+  <body>
+    <button>Analyze input</button>
+    <script type="text/javascript">
+      async function main(){
+          const dirHandle = await showDirectoryPicker();
+          if ((await dirHandle.queryPermission({ mode: "readwrite" })) !== "granted") {
+              if (
+                  (await dirHandle.requestPermission({ mode: "readwrite" })) !== "granted"
+              ) {
+                  throw Error("Unable to read and write directory");
+              }
+          }
+          let pyodide = await loadPyodide();
+          const nativefs = await pyodide.mountNativeFS("/mount_dir", dirHandle);
+
+          pyodide.runPython(`
+            import os
+            print(os.listdir('/mount_dir'))
+          `);
+      }
+
+      const button = document.querySelector('button');
+      button.addEventListener('click', main);
+    </script>
+  </body>
+</html>
