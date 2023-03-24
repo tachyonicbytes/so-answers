@@ -6,11 +6,26 @@
   <body>
     <button>Analyze input</button>
     <script type="text/javascript">
-      async function main(){
-          const dirHandle = await showDirectoryPicker();
-          if ((await dirHandle.queryPermission({ mode: "readwrite" })) !== "granted") {
+
+      // Check if handle exists inside directory our directory handle
+      async function inDirectory(directoryHandle, fileHandle) {
+        return await directoryHandle.resolve(fileHandle) === null;
+      }
+
+      async function main() {
+        const dirHandle = await showDirectoryPicker();
+        const [fileHandle] = await showOpenFilePicker();
+        const bad = await inDirectory(dirHandle, fileHandle);
+        if (bad) {
+          throw Error("The file is not in the mounted directory");
+          return;
+        }
+
+        const fileData = await fileHandle.getFile();
+        console.log(fileData.name);
+          if ((await fileHandle.queryPermission({ mode: "readwrite" })) !== "granted") {
               if (
-                  (await dirHandle.requestPermission({ mode: "readwrite" })) !== "granted"
+                  (await fileHandle.requestPermission({ mode: "readwrite" })) !== "granted"
               ) {
                   throw Error("Unable to read and write directory");
               }
@@ -21,6 +36,7 @@
           pyodide.runPython(`
             import os
             print(os.listdir('/mount_dir'))
+            print(open('/mount_dir/${fileData.name}').read())
           `);
       }
 
