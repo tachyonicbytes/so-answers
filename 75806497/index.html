@@ -6,40 +6,35 @@
   <body>
     <button>Analyze input</button>
     <script type="text/javascript">
-
-      // Check if handle exists inside directory our directory handle
-      async function inDirectory(directoryHandle, fileHandle) {
-        return await directoryHandle.resolve(fileHandle) === null;
-      }
-
       async function main() {
-        const dirHandle = await showDirectoryPicker();
+        // Get the file contents into JS
         const [fileHandle] = await showOpenFilePicker();
-        const bad = await inDirectory(dirHandle, fileHandle);
-        if (bad) {
-          throw Error("The file is not in the mounted directory");
-          return;
-        }
-
         const fileData = await fileHandle.getFile();
-        console.log(fileData.name);
-          if ((await fileHandle.queryPermission({ mode: "readwrite" })) !== "granted") {
-              if (
-                  (await fileHandle.requestPermission({ mode: "readwrite" })) !== "granted"
-              ) {
-                  throw Error("Unable to read and write directory");
-              }
-          }
-          let pyodide = await loadPyodide();
-          const nativefs = await pyodide.mountNativeFS("/mount_dir", dirHandle);
+        const contents = await fileData.text();
 
-          pyodide.runPython(`
-            import os
-            print(os.listdir('/mount_dir'))
-            print(open('/mount_dir/${fileData.name}').read())
-          `);
+        // Create the Python convert toy function
+        let pyodide = await loadPyodide();
+        let convert = pyodide.runPython(`
+from pyodide.ffi import to_js
+def convert(contents):
+    return to_js(contents.lower())
+convert
+      `);
+
+        let result = convert(contents);
+        console.log(result);
+
+        const blob = new Blob([result], {type : 'application/text'});
+
+        let url = window.URL.createObjectURL(blob);
+
+        var downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.text = "Download output";
+        downloadLink.download = "out.txt";
+        document.body.appendChild(downloadLink);
+
       }
-
       const button = document.querySelector('button');
       button.addEventListener('click', main);
     </script>
