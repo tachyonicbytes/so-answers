@@ -3,6 +3,12 @@ import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
 
+async function invokeTauriCommand(command: any) {
+  return invoke("tauri", command);
+}
+
+
+
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
@@ -11,6 +17,56 @@ function App() {
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
     setGreetMsg(await invoke("greet", { name }));
   }
+
+  interface DialogFilter {
+    /** Filter name. */
+    name: string
+    /**
+     * Extensions to filter, without a `.` prefix.
+     * @example
+     * ```typescript
+     * extensions: ['svg', 'png']
+     * ```
+     */
+    extensions: string[]
+  }
+
+  interface OpenDialogOptions {
+    /** The title of the dialog window. */
+    title?: string
+    /** The filters of the dialog. */
+    filters?: DialogFilter[]
+    /** Initial directory or file path. */
+    defaultPath?: string
+    /** Whether the dialog allows multiple selection or not. */
+    multiple?: boolean
+    /** Whether the dialog is a directory selection or not. */
+    directory?: boolean
+    /**
+     * If `directory` is true, indicates that it will be read recursively later.
+     * Defines whether subdirectories will be allowed on the scope or not.
+     */
+    recursive?: boolean
+  }
+
+  async function open(
+    options: OpenDialogOptions = {}
+  ): Promise<null | string | string[]> {
+    if (typeof options === 'object') {
+      Object.freeze(options)
+    }
+    let res = invokeTauriCommand({
+      __tauriModule: 'Dialog',
+      message: {
+        cmd: 'openDialog',
+        options
+      }
+    })
+
+    return res as any;
+  }
+
+
 
   return (
     <div className="container">
@@ -35,6 +91,7 @@ function App() {
         onSubmit={(e) => {
           e.preventDefault();
           greet();
+          open();
         }}
       >
         <input
