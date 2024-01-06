@@ -1,6 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::{Monitor, async_runtime::TokioRuntime, Manager, Menu};
+use tauri_runtime::Dispatch;
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -19,7 +22,14 @@ fn create_app<R: tauri::Runtime>(mut builder: tauri::Builder<R>) -> tauri::App<R
 }
 
 fn main() {
+    let menu = Menu::new(); // configure the menu
+
     tauri::Builder::default()
+        .menu(menu)
+	.setup(|app| {
+	    println!("{}", app.package_info().version.to_string());
+	    Ok(())
+	})
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .unwrap();
@@ -47,5 +57,9 @@ mod tests {
             },
             Ok("Hello, the test! You've been greeted from Rust!"),
         );
+    }
+
+    #[test]
+    fn test_get_monitor_ids() {
     }
 }
