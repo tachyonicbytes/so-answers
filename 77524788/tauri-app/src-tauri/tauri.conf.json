@@ -39,7 +39,7 @@
       ]
     },
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; img-src photo://*;"
     },
     "windows": [
       {

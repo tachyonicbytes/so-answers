@@ -2,6 +2,7 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
+import { appWindow } from '@tauri-apps/api/window';
 
 async function invokeTauriCommand(command: any) {
   return invoke("tauri", command);
@@ -12,6 +13,10 @@ async function invokeTauriCommand(command: any) {
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
+
+  async function disableClosable() {
+    await appWindow.setClosable(false);
+  }
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -82,6 +87,7 @@ function App() {
         <a href="https://reactjs.org" target="_blank">
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
+        <img src="photo://localhost?id=1" />
       </div>
 
       <p>Click on the Tauri, Vite, and React logos to learn more.</p>
@@ -91,7 +97,8 @@ function App() {
         onSubmit={(e) => {
           e.preventDefault();
           greet();
-          open();
+          disableClosable();
+          // open();
         }}
       >
         <input

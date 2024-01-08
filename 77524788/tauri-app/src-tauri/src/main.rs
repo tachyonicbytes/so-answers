@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::{Monitor, async_runtime::TokioRuntime, Manager, Menu};
+use tauri::{Monitor, async_runtime::TokioRuntime, Manager, Menu, http::ResponseBuilder};
 use tauri_runtime::Dispatch;
 
 #[tauri::command]
@@ -30,6 +30,13 @@ fn main() {
 	    println!("{}", app.package_info().version.to_string());
 	    Ok(())
 	})
+    .register_uri_scheme_protocol("photo", move |app, request| {
+        dbg!(&request);
+
+        ResponseBuilder::new()
+            .status(200)
+            .body(Vec::new())
+    })
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .unwrap();
